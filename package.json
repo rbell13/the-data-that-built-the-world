@@ -1,0 +1,9 @@
+{
+  "name": "the-data-that-built-the-world",
+  "version": "1.0.0",
+  "description": "A Marp presentation about influential datasets.",
+  "license": "CC-BY-SA-4.0",
+  "devDependencies": {
+    "@marp-team/marp-cli": "^4.5.1"
+  }
+}

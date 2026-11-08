@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.cache/
+.DS_Store
+
+# Obsidian machine-specific state
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache/

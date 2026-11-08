@@ -1,0 +1,56 @@
+version: '3'
+
+vars:
+  DECK: slides/presentation.md
+  THEME: themes/archive.css
+  OUTPUT: dist
+
+tasks:
+  install:
+    desc: Install project dependencies
+    cmds:
+      - npm ci
+
+  preview:
+    desc: Launch the presentation in a browser
+    cmds:
+      - >
+        npx marp
+        --theme {{.THEME}}
+        --allow-local-files
+        --server .
+
+  pptx:
+    desc: Generate PowerPoint presentation
+    cmds:
+      - mkdir -p {{.OUTPUT}}
+      - >
+        npx marp
+        --theme {{.THEME}}
+        --allow-local-files
+        {{.DECK}}
+        --pptx
+        -o {{.OUTPUT}}/presentation.pptx
+
+  pdf:
+    desc: Generate PDF presentation
+    cmds:
+      - mkdir -p {{.OUTPUT}}
+      - >
+        npx marp
+        --theme {{.THEME}}
+        --allow-local-files
+        {{.DECK}}
+        --pdf
+        -o {{.OUTPUT}}/presentation.pdf
+
+  build:
+    desc: Export presentation to PPTX and PDF
+    cmds:
+      - task: pptx
+      - task: pdf
+
+  clean:
+    desc: Delete generated files
+    cmds:
+      - rm -rf {{.OUTPUT}}
