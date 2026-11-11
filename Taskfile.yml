@@ -1,11 +1,21 @@
+---
 version: '3'
 
 vars:
   DECK: slides/presentation.md
   THEME: themes/archive.css
   OUTPUT: dist
+  NAME: presentation
+
+  # Web distribution
+  WEB_OUTPUT: '{{.OUTPUT}}/web'
 
 tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
   install:
     desc: Install project dependencies
     cmds:
@@ -20,6 +30,18 @@ tasks:
         --allow-local-files
         --server .
 
+  watch:
+    desc: Watch Markdown and regenerate HTML on changes
+    cmds:
+      - mkdir -p {{.OUTPUT}}
+      - >
+        npx marp
+        --theme {{.THEME}}
+        --allow-local-files
+        --watch
+        {{.DECK}}
+        -o {{.OUTPUT}}/{{.NAME}}.html
+
   pptx:
     desc: Generate PowerPoint presentation
     cmds:
@@ -30,7 +52,7 @@ tasks:
         --allow-local-files
         {{.DECK}}
         --pptx
-        -o {{.OUTPUT}}/presentation.pptx
+        -o {{.OUTPUT}}/{{.NAME}}.pptx
 
   pdf:
     desc: Generate PDF presentation
@@ -42,13 +64,61 @@ tasks:
         --allow-local-files
         {{.DECK}}
         --pdf
-        -o {{.OUTPUT}}/presentation.pdf
+        -o {{.OUTPUT}}/{{.NAME}}.pdf
+
+  html:
+    desc: Generate interactive HTML presentation with speaker notes
+    cmds:
+      - mkdir -p {{.OUTPUT}}
+      - >
+        npx marp
+        --theme {{.THEME}}
+        --allow-local-files
+        {{.DECK}}
+        -o {{.OUTPUT}}/{{.NAME}}.html
+
+  notes:
+    desc: Export speaker notes to a text file
+    cmds:
+      - mkdir -p {{.OUTPUT}}
+      - >
+        npx marp
+        {{.DECK}}
+        --notes
+        -o {{.OUTPUT}}/{{.NAME}}-notes.txt
+
+  web:
+    desc: Build standalone HTML presentation for Astro
+    cmds:
+      # Clean output
+      - rm -rf {{.WEB_OUTPUT}}
+      - mkdir -p {{.WEB_OUTPUT}}/assets/images
+
+      # Copy local image assets
+      - cp -a assets/images/. {{.WEB_OUTPUT}}/assets/images/
+
+      # Generate HTML presentation
+      - >-
+        npx --no-install marp
+        --theme {{.THEME}}
+        --allow-local-files
+        {{.DECK}}
+        -o {{.WEB_OUTPUT}}/index.html
+
+      # Fix image paths relative to the HTML file
+      - >-
+        sed -i
+        's|\.\./assets/images/|assets/images/|g'
+        {{.WEB_OUTPUT}}/index.html
 
   build:
-    desc: Export presentation to PPTX and PDF
+    desc: Generate all presentation formats
     cmds:
       - task: pptx
       - task: pdf
+      - task: html
+      - task: notes
+      - task: web
 
   clean:
     desc: Delete generated files
